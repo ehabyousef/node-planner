@@ -80,7 +80,7 @@ export const singleGoal = expressAsyncHandler(
       res.status(400).json({ message: "goal ID is required" });
     }
 
-    const goal = await goalModel.findById(id);
+    const goal = await goalModel.findOne({ _id: id, user: createdBy });
 
     if (!goal) {
       res.status(404).json({ message: "goal not found or unauthorized" });

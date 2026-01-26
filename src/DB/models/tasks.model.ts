@@ -72,7 +72,7 @@ taskSchema.index({ user: 1, goal_id: 1 });
 taskSchema.index({ goal_id: 1, status: 1 });
 
 // Auto-set completed_at when task is marked as completed
-taskSchema.pre("save", function (next) {
+taskSchema.pre("save", function () {
   if (this.isModified("status")) {
     if (this.status === "DONE" && !this.completed_at) {
       this.completed_at = new Date();
@@ -80,7 +80,6 @@ taskSchema.pre("save", function (next) {
       this.completed_at = undefined;
     }
   }
-  next();
 });
 
 export const taskModel = model("Task", taskSchema);
