@@ -1,20 +1,5 @@
 import { model, Model, Schema, Types } from "mongoose";
-
-// Interface for Goal document
-interface IGoal {
-  user: Types.ObjectId;
-  category_id: Types.ObjectId;
-  title: string;
-  description: string;
-  priority: "LOW" | "MEDIUM" | "HIGH";
-  status: "ACTIVE" | "COMPLETED" | "ARCHIVED";
-  progress_percent: number;
-  start_date?: Date;
-  end_date?: Date;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
+import { IGoal } from "../../utils/types";
 // Interface for Goal model with static methods
 interface IGoalModel extends Model<IGoal> {
   findWithProgress(filter?: any): Promise<any[]>;

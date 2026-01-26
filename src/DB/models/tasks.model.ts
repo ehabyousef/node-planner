@@ -35,8 +35,8 @@ const taskSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["ACTIVE", "COMPLETED", "ARCHIVED"],
-      default: "ACTIVE",
+      enum: ["TODO", "IN_PROGRESS", "DONE"],
+      default: "TODO",
       index: true,
     },
     progress_percent: {
@@ -74,9 +74,9 @@ taskSchema.index({ goal_id: 1, status: 1 });
 // Auto-set completed_at when task is marked as completed
 taskSchema.pre("save", function (next) {
   if (this.isModified("status")) {
-    if (this.status === "COMPLETED" && !this.completed_at) {
+    if (this.status === "DONE" && !this.completed_at) {
       this.completed_at = new Date();
-    } else if (this.status !== "COMPLETED") {
+    } else if (this.status !== "DONE") {
       this.completed_at = undefined;
     }
   }
