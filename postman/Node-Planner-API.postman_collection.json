@@ -14,6 +14,21 @@
       "key": "token",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "categoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "goalId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "taskId",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -32,7 +47,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Password123!\"\n}"
+              "raw": "{\n  \"userName\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Password123!\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/register",
@@ -72,6 +87,141 @@
               "raw": "{{baseUrl}}/auth/login",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "login"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categories?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Category",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "{{categoryId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.category && jsonData.category._id) {",
+                  "    pm.collectionVariables.set(\"categoryId\", jsonData.category._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Name\": \"Work\",\n  \"color\": \"#3498db\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories/addCategory",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "addCategory"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Name\": \"Work Projects\",\n  \"color\": \"#2980b9\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories/updateCategory/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "updateCategory", "{{categoryId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categories/deleteCategory/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "deleteCategory", "{{categoryId}}"]
             }
           },
           "response": []
@@ -120,21 +270,29 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/goals/:id",
+              "raw": "{{baseUrl}}/goals/{{goalId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["goals", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "goal_id_here"
-                }
-              ]
+              "path": ["goals", "{{goalId}}"]
             }
           },
           "response": []
         },
         {
           "name": "Create Goal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.goal && jsonData.goal._id) {",
+                  "    pm.collectionVariables.set(\"goalId\", jsonData.goal._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -149,7 +307,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Learn Node.js\",\n  \"description\": \"Master backend development with Node.js\",\n  \"priority\": \"HIGH\",\n  \"status\": \"TODO\",\n  \"start_date\": \"2026-01-26T00:00:00.000Z\",\n  \"end_date\": \"2026-06-26T00:00:00.000Z\"\n}"
+              "raw": "{\n  \"title\": \"Learn Node.js\",\n  \"description\": \"Master backend development with Node.js and Express\",\n  \"priority\": \"HIGH\",\n  \"status\": \"ACTIVE\",\n  \"start_date\": \"2026-01-26T00:00:00.000Z\",\n  \"end_date\": \"2026-06-26T00:00:00.000Z\",\n  \"category_id\": \"{{categoryId}}\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/goals/addGoal",
@@ -175,24 +333,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Master Node.js\",\n  \"status\": \"IN_PROGRESS\",\n  \"priority\": \"HIGH\"\n}"
+              "raw": "{\n  \"title\": \"Master Node.js\",\n  \"description\": \"Become an expert in backend development with Node.js\",\n  \"status\": \"ACTIVE\",\n  \"priority\": \"HIGH\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/goals/updateGoal/:id",
+              "raw": "{{baseUrl}}/goals/updateGoal/{{goalId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["goals", "updateGoal", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "goal_id_here"
-                }
-              ]
+              "path": ["goals", "updateGoal", "{{goalId}}"]
             }
           },
           "response": []
         },
         {
-          "name": "Delete Goal (Soft Delete)",
+          "name": "Delete Goal",
           "request": {
             "method": "DELETE",
             "header": [
@@ -202,15 +354,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/goals/deleteGoal/:id",
+              "raw": "{{baseUrl}}/goals/deleteGoal/{{goalId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["goals", "deleteGoal", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "goal_id_here"
-                }
-              ]
+              "path": ["goals", "deleteGoal", "{{goalId}}"]
             }
           },
           "response": []
@@ -259,21 +405,29 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/tasks/:id",
+              "raw": "{{baseUrl}}/tasks/{{taskId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["tasks", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "task_id_here"
-                }
-              ]
+              "path": ["tasks", "{{taskId}}"]
             }
           },
           "response": []
         },
         {
           "name": "Create Task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.task && jsonData.task._id) {",
+                  "    pm.collectionVariables.set(\"taskId\", jsonData.task._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -288,7 +442,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Learn Express.js\",\n  \"description\": \"Complete Express.js tutorial\",\n  \"priority\": \"MEDIUM\",\n  \"status\": \"TODO\",\n  \"start_date\": \"2026-01-26T00:00:00.000Z\",\n  \"end_date\": \"2026-02-26T00:00:00.000Z\",\n  \"goal_id\": \"goal_id_here\"\n}"
+              "raw": "{\n  \"title\": \"Learn Express.js\",\n  \"description\": \"Complete Express.js tutorial and build REST API\",\n  \"priority\": \"MEDIUM\",\n  \"status\": \"TODO\",\n  \"start_date\": \"2026-01-26T00:00:00.000Z\",\n  \"end_date\": \"2026-02-26T00:00:00.000Z\",\n  \"goal_id\": \"{{goalId}}\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/tasks/addTask",
@@ -314,24 +468,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Master Express.js\",\n  \"status\": \"IN_PROGRESS\"\n}"
+              "raw": "{\n  \"title\": \"Master Express.js\",\n  \"description\": \"Complete advanced Express.js concepts\",\n  \"status\": \"IN_PROGRESS\",\n  \"priority\": \"HIGH\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/tasks/updateTask/:id",
+              "raw": "{{baseUrl}}/tasks/updateTask/{{taskId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["tasks", "updateTask", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "task_id_here"
-                }
-              ]
+              "path": ["tasks", "updateTask", "{{taskId}}"]
             }
           },
           "response": []
         },
         {
-          "name": "Delete Task (Soft Delete)",
+          "name": "Delete Task",
           "request": {
             "method": "DELETE",
             "header": [
@@ -341,39 +489,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/tasks/deleteTask/:id",
+              "raw": "{{baseUrl}}/tasks/deleteTask/{{taskId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["tasks", "deleteTask", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "task_id_here"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Restore Task",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/tasks/restore/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["tasks", "restore", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "task_id_here"
-                }
-              ]
+              "path": ["tasks", "deleteTask", "{{taskId}}"]
             }
           },
           "response": []

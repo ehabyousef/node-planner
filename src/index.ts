@@ -5,6 +5,7 @@ import morgan from "morgan";
 import { authRouter } from "./modules/auth/auth.route";
 import { goalRoter } from "./modules/goals/goal.route";
 import { taskRouter } from "./modules/tasks/task.route";
+import { categoriesRouter } from "./modules/cateogries/categories.route";
 import { errorhandler, notFound } from "./middleware/errorHandler";
 
 const app = express();
@@ -31,6 +32,7 @@ app.get("/health", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/goals", goalRoter);
 app.use("/api/tasks", taskRouter);
+app.use("/api/categories", categoriesRouter);
 app.use(notFound);
 app.use(errorhandler);
 export default app;

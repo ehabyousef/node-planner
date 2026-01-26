@@ -1,4 +1,4 @@
-import { model, Schema, Types } from "mongoose";
+import { model, Schema } from "mongoose";
 
 const categoriesSchema = new Schema(
   {
@@ -13,13 +13,19 @@ const categoriesSchema = new Schema(
       type: String,
       required: true,
     },
-    goals: [
-      {
-        _id: false,
-        goals: { type: Types.ObjectId, ref: "Goal" },
-      },
-    ],
   },
   { timestamps: true },
 );
+
+// Virtual for goals (query from Goal model via category_id)
+categoriesSchema.virtual("goals", {
+  ref: "Goal",
+  localField: "_id",
+  foreignField: "category_id",
+});
+
+// Enable virtuals in JSON
+categoriesSchema.set("toJSON", { virtuals: true });
+categoriesSchema.set("toObject", { virtuals: true });
+
 export const categories = model("Categories", categoriesSchema);
