@@ -2,6 +2,7 @@ import expressAsyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import { IGoal } from "../../utils/types";
 import { goalModel } from "../../DB/models/goal.model";
+import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/cloudinary";
 
 export const addGoal = expressAsyncHandler(
   async (req: Request, res: Response) => {
@@ -17,7 +18,8 @@ export const addGoal = expressAsyncHandler(
 
     const createdBy = (req as any).user.id;
 
-    const goal = new goalModel({
+    // Prepare goal data
+    const goalData: any = {
       title: title,
       description: description,
       priority: priority,
@@ -26,10 +28,33 @@ export const addGoal = expressAsyncHandler(
       end_date: end_date,
       user: createdBy,
       category_id: category_id,
-    });
+    };
 
+    // Handle image upload if file is present
+    if (req.file) {
+      try {
+        // Upload buffer directly to Cloudinary
+        const uploadResult = await uploadToCloudinary(req.file.buffer, "goals");
+
+        // Add image data to goal
+        goalData.image = {
+          id: uploadResult.id,
+          url: uploadResult.url,
+        };
+      } catch (error) {
+        console.error("Image upload error:", error);
+        res.status(500).json({ message: "Failed to upload image" });
+        return;
+      }
+    }
+
+    const goal = new goalModel(goalData);
     await goal.save();
-    res.status(201).json({ message: "created goal successfully" });
+    
+    res.status(201).json({ 
+      message: "created goal successfully", 
+      goal: goal 
+    });
   },
 );
 
@@ -98,26 +123,57 @@ export const updateGoal = expressAsyncHandler(
 
     if (!createdBy) {
       res.status(400).json({ message: "login first" });
+      return;
     }
 
     if (!id) {
       res.status(400).json({ message: "goal ID is required" });
+      return;
+    }
+
+    // Prepare update data
+    const updateData: any = {
+      title,
+      description,
+      priority,
+      status,
+      end_date,
+    };
+
+    // Handle new image upload
+    if (req.file) {
+      try {
+        // Get existing goal to delete old image
+        const existingGoal = await goalModel.findOne({ _id: id, user: createdBy });
+        
+        if (existingGoal?.image?.id) {
+          // Delete old image from Cloudinary
+          await deleteFromCloudinary(existingGoal.image.id);
+        }
+
+        // Upload buffer directly to Cloudinary
+        const uploadResult = await uploadToCloudinary(req.file.buffer, "goals");
+
+        updateData.image = {
+          id: uploadResult.id,
+          url: uploadResult.url,
+        };
+      } catch (error) {
+        console.error("Image upload error:", error);
+        res.status(500).json({ message: "Failed to upload image" });
+        return;
+      }
     }
 
     const goal = await goalModel.findOneAndUpdate(
       { _id: id, user: createdBy },
-      {
-        title,
-        description,
-        priority,
-        status,
-        end_date,
-      },
+      updateData,
       { new: true, runValidators: true },
     );
 
     if (!goal) {
       res.status(404).json({ message: "goal not found or unauthorized" });
+      return;
     }
 
     res.status(200).json({ message: "goal updated successfully", goal });
@@ -131,18 +187,32 @@ export const deleteGoal = expressAsyncHandler(
 
     if (!createdBy) {
       res.status(400).json({ message: "login first" });
+      return;
     }
 
     if (!id) {
       res.status(400).json({ message: "goal ID is required" });
+      return;
     }
 
-    const goal = await goalModel.findByIdAndDelete(id);
+    const goal = await goalModel.findById(id);
 
     if (!goal) {
       res.status(404).json({ message: "goal not found or unauthorized" });
+      return;
     }
 
+    // Delete image from Cloudinary if exists
+    if (goal.image?.id) {
+      try {
+        await deleteFromCloudinary(goal.image.id);
+      } catch (error) {
+        console.error("Failed to delete image from Cloudinary:", error);
+        // Continue with goal deletion even if image deletion fails
+      }
+    }
+
+    await goalModel.findByIdAndDelete(id);
     res.status(200).json({ message: "goal deleted successfully" });
   },
 );

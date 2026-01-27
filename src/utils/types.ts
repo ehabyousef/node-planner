@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Schema, Types } from "mongoose";
 
 export interface userType {
   _id: Types.ObjectId;
@@ -7,13 +7,19 @@ export interface userType {
   password: string;
 }
 
-// Interface for Goal document
+// Interface for Image object
+export interface IImage {
+  id: string;  // Cloudinary public_id
+  url: string; // Cloudinary secure URL
+}
 
+// Interface for Goal document
 export interface IGoal {
   user: Types.ObjectId;
   category_id: Types.ObjectId;
   title: string;
   description: string;
+  image?: IImage; // Optional image field
   priority: "LOW" | "MEDIUM" | "HIGH";
   status: "ACTIVE" | "COMPLETED" | "ARCHIVED";
   progress_percent: number;
@@ -35,3 +41,11 @@ export interface ITask {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export const imageSchema = new Schema(
+  {
+    id: { type: String, required: true }, // Cloudinary public_id
+    url: { type: String, required: true }, // Cloudinary URL
+  },
+  { _id: false, id: false },
+);

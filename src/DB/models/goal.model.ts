@@ -33,6 +33,14 @@ const goalSchema = new Schema<IGoal, IGoalModel>(
       required: true,
       trim: true,
     },
+    image: {
+      type: {
+        id: { type: String, required: true },
+        url: { type: String, required: true },
+      },
+      required: false,
+      _id: false,
+    },
     priority: {
       type: String,
       enum: ["LOW", "MEDIUM", "HIGH"],
