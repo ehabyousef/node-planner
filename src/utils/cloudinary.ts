@@ -1,4 +1,8 @@
+import dotenv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
+
+// Load environment variables (needed when this file is imported before dotenv is initialized elsewhere)
+dotenv.config();
 
 // Configure Cloudinary with your credentials
 cloudinary.config({
