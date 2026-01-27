@@ -16,3 +16,6 @@ connectDB()
     logger.error("❌ Failed to start server:", err.message);
     process.exit(1);
   });
+
+// Export for Vercel serverless
+export default app;

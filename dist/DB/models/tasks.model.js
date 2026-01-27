@@ -1,0 +1,82 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.taskModel = void 0;
+const mongoose_1 = require("mongoose");
+const taskSchema = new mongoose_1.Schema({
+    user: {
+        type: mongoose_1.Types.ObjectId,
+        ref: "User",
+        required: true,
+        index: true,
+    },
+    goal_id: {
+        type: mongoose_1.Types.ObjectId,
+        ref: "Goal",
+        required: true,
+        index: true,
+    },
+    title: {
+        type: String,
+        minlength: 2,
+        maxlength: 100,
+        required: true,
+        trim: true,
+    },
+    description: {
+        type: String,
+        minlength: 2,
+        maxlength: 500,
+        required: true,
+        trim: true,
+    },
+    priority: {
+        type: String,
+        enum: ["LOW", "MEDIUM", "HIGH"],
+        default: "LOW",
+    },
+    status: {
+        type: String,
+        enum: ["TODO", "IN_PROGRESS", "DONE"],
+        default: "TODO",
+        index: true,
+    },
+    progress_percent: {
+        type: Number,
+        min: 0,
+        max: 100,
+        default: 0,
+    },
+    start_date: {
+        type: Date,
+        required: false,
+    },
+    end_date: {
+        type: Date,
+        required: false,
+        validate: {
+            validator: function (value) {
+                return !this.start_date || !value || value >= this.start_date;
+            },
+            message: "End date must be after or equal to start date",
+        },
+    },
+    completed_at: {
+        type: Date,
+        required: false,
+    },
+}, { timestamps: true });
+// Compound index for efficient queries
+taskSchema.index({ user: 1, goal_id: 1 });
+taskSchema.index({ goal_id: 1, status: 1 });
+// Auto-set completed_at when task is marked as completed
+taskSchema.pre("save", function () {
+    if (this.isModified("status")) {
+        if (this.status === "DONE" && !this.completed_at) {
+            this.completed_at = new Date();
+        }
+        else if (this.status !== "DONE") {
+            this.completed_at = undefined;
+        }
+    }
+});
+exports.taskModel = (0, mongoose_1.model)("Task", taskSchema);

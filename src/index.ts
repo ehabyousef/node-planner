@@ -35,4 +35,5 @@ app.use("/api/tasks", taskRouter);
 app.use("/api/categories", categoriesRouter);
 app.use(notFound);
 app.use(errorhandler);
+
 export default app;
