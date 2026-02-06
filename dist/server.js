@@ -19,3 +19,5 @@ const PORT = process.env.PORT || 5002;
     logger_1.default.error("❌ Failed to start server:", err.message);
     process.exit(1);
 });
+// Export for Vercel serverless
+exports.default = index_1.default;

@@ -8,6 +8,7 @@ const express_async_handler_1 = __importDefault(require("express-async-handler")
 const tasks_model_1 = require("../../DB/models/tasks.model");
 exports.getTasks = (0, express_async_handler_1.default)(async (req, res) => {
     const user = req.user;
+    const { goalId } = req.params;
     if (!user) {
         res.status(400).json({ message: "login first" });
     }
@@ -16,11 +17,14 @@ exports.getTasks = (0, express_async_handler_1.default)(async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
     const tasks = await tasks_model_1.taskModel
-        .find({ user: user.id })
+        .find({ user: user.id, goal_id: goalId })
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 });
-    const totalTasks = await tasks_model_1.taskModel.countDocuments({ user: user.id });
+    const totalTasks = await tasks_model_1.taskModel.countDocuments({
+        user: user.id,
+        goal_id: goalId,
+    });
     const totalPages = Math.ceil(totalTasks / limit);
     res.status(200).json({
         message: "got all tasks",
@@ -55,8 +59,13 @@ exports.addTask = (0, express_async_handler_1.default)(async (req, res) => {
 exports.singleTask = (0, express_async_handler_1.default)(async (req, res) => {
     const user = req.user;
     const { id } = req.params;
+    const { goalId } = req.params;
     // ✅ Find task and verify ownership in one query
-    const task = await tasks_model_1.taskModel.findOne({ _id: id, user: user.id });
+    const task = await tasks_model_1.taskModel.findOne({
+        _id: id,
+        user: user.id,
+        goal_id: goalId,
+    });
     if (!task) {
         res.status(404).json({ message: "task not found or unauthorized" });
     }

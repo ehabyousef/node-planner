@@ -1,12 +1,12 @@
 import expressAsyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import { IGoal, ITask } from "../../utils/types";
-import { goalModel } from "../../DB/models/goal.model";
+import { ITask } from "../../utils/types";
 import { taskModel } from "../../DB/models/tasks.model";
 
 export const getTasks = expressAsyncHandler(
   async (req: Request, res: Response) => {
     const user = (req as any).user;
+    const { goalId } = req.params;
     if (!user) {
       res.status(400).json({ message: "login first" });
     }
@@ -17,12 +17,15 @@ export const getTasks = expressAsyncHandler(
     const skip = (page - 1) * limit;
 
     const tasks = await taskModel
-      .find({ user: user.id })
+      .find({ user: user.id, goal_id: goalId })
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
 
-    const totalTasks = await taskModel.countDocuments({ user: user.id });
+    const totalTasks = await taskModel.countDocuments({
+      user: user.id,
+      goal_id: goalId,
+    });
     const totalPages = Math.ceil(totalTasks / limit);
     res.status(200).json({
       message: "got all tasks",
@@ -74,9 +77,13 @@ export const singleTask = expressAsyncHandler(
   async (req: Request, res: Response) => {
     const user = (req as any).user;
     const { id } = req.params;
-
+    const { goalId } = req.params;
     // ✅ Find task and verify ownership in one query
-    const task = await taskModel.findOne({ _id: id, user: user.id });
+    const task = await taskModel.findOne({
+      _id: id,
+      user: user.id,
+      goal_id: goalId,
+    });
 
     if (!task) {
       res.status(404).json({ message: "task not found or unauthorized" });

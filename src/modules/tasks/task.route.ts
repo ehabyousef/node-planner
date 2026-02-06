@@ -10,8 +10,8 @@ export const taskRouter = express.Router();
 // ✅ Apply requireAuth after verifyToken
 taskRouter.use(verifyToken, requireAuth);
 
-taskRouter.get("/", getTasks);
-taskRouter.get("/:id", singleTask);
+taskRouter.get("/:goalId", getTasks);
+taskRouter.get("/:goalId/:id", singleTask);
 taskRouter.post("/addTask", Validator(createTaskValidation), addTask);
 taskRouter.put("/updateTask/:id", Validator(updateTaskValidation), updateTask);
 taskRouter.post("/deleteTask/:id", deletetask);

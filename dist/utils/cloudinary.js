@@ -1,7 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteFromCloudinary = exports.uploadToCloudinary = void 0;
+const dotenv_1 = __importDefault(require("dotenv"));
 const cloudinary_1 = require("cloudinary");
+// Load environment variables (needed when this file is imported before dotenv is initialized elsewhere)
+dotenv_1.default.config();
 // Configure Cloudinary with your credentials
 cloudinary_1.v2.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
