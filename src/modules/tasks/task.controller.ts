@@ -6,6 +6,41 @@ import { taskModel } from "../../DB/models/tasks.model";
 export const getTasks = expressAsyncHandler(
   async (req: Request, res: Response) => {
     const user = (req as any).user;
+    if (!user) {
+      res.status(400).json({ message: "login first" });
+    }
+
+    // pagination
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const tasks = await taskModel
+      .find({ user: user.id })
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: 1 })
+      .populate("goal_id", "title"); // ✅ Populate goal title
+
+    const totalTasks = await taskModel.countDocuments({
+      user: user.id,
+    });
+    const totalPages = Math.ceil(totalTasks / limit);
+    res.status(200).json({
+      message: "got all tasks",
+      tasks: tasks,
+      pagination: {
+        currentPage: page,
+        totalPages: totalPages,
+        totalTasks: totalTasks,
+        limit: limit,
+      },
+    });
+  },
+);
+export const goalTasks = expressAsyncHandler(
+  async (req: Request, res: Response) => {
+    const user = (req as any).user;
     const { goalId } = req.params;
     if (!user) {
       res.status(400).json({ message: "login first" });
@@ -20,7 +55,8 @@ export const getTasks = expressAsyncHandler(
       .find({ user: user.id, goal_id: goalId })
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: 1 })
+      .populate("goal_id", "title"); // ✅ Populate goal title
 
     const totalTasks = await taskModel.countDocuments({
       user: user.id,

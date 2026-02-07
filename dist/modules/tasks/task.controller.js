@@ -3,10 +3,40 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deletetask = exports.updateTask = exports.singleTask = exports.addTask = exports.getTasks = void 0;
+exports.deletetask = exports.updateTask = exports.singleTask = exports.addTask = exports.goalTasks = exports.getTasks = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const tasks_model_1 = require("../../DB/models/tasks.model");
 exports.getTasks = (0, express_async_handler_1.default)(async (req, res) => {
+    const user = req.user;
+    if (!user) {
+        res.status(400).json({ message: "login first" });
+    }
+    // pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const tasks = await tasks_model_1.taskModel
+        .find({ user: user.id })
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: 1 })
+        .populate("goal_id", "title"); // ✅ Populate goal title
+    const totalTasks = await tasks_model_1.taskModel.countDocuments({
+        user: user.id,
+    });
+    const totalPages = Math.ceil(totalTasks / limit);
+    res.status(200).json({
+        message: "got all tasks",
+        tasks: tasks,
+        pagination: {
+            currentPage: page,
+            totalPages: totalPages,
+            totalTasks: totalTasks,
+            limit: limit,
+        },
+    });
+});
+exports.goalTasks = (0, express_async_handler_1.default)(async (req, res) => {
     const user = req.user;
     const { goalId } = req.params;
     if (!user) {
@@ -20,7 +50,8 @@ exports.getTasks = (0, express_async_handler_1.default)(async (req, res) => {
         .find({ user: user.id, goal_id: goalId })
         .skip(skip)
         .limit(limit)
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: 1 })
+        .populate("goal_id", "title"); // ✅ Populate goal title
     const totalTasks = await tasks_model_1.taskModel.countDocuments({
         user: user.id,
         goal_id: goalId,

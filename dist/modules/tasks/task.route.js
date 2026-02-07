@@ -13,7 +13,8 @@ const task_validation_1 = require("./task.validation");
 exports.taskRouter = express_1.default.Router();
 // ✅ Apply requireAuth after verifyToken
 exports.taskRouter.use(verifyToken_1.verifyToken, requireAuth_1.requireAuth);
-exports.taskRouter.get("/:goalId", task_controller_1.getTasks);
+exports.taskRouter.get("/", task_controller_1.getTasks);
+exports.taskRouter.get("/:goalId", task_controller_1.goalTasks);
 exports.taskRouter.get("/:goalId/:id", task_controller_1.singleTask);
 exports.taskRouter.post("/addTask", (0, validator_1.Validator)(task_validation_1.createTaskValidation), task_controller_1.addTask);
 exports.taskRouter.put("/updateTask/:id", (0, validator_1.Validator)(task_validation_1.updateTaskValidation), task_controller_1.updateTask);
