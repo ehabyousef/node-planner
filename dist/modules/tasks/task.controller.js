@@ -20,7 +20,7 @@ exports.getTasks = (0, express_async_handler_1.default)(async (req, res) => {
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: 1 })
-        .populate("goal_id", "title"); // ✅ Populate goal title
+        .populate("title"); // ✅ Populate goal title
     const totalTasks = await tasks_model_1.taskModel.countDocuments({
         user: user.id,
     });
@@ -51,7 +51,7 @@ exports.goalTasks = (0, express_async_handler_1.default)(async (req, res) => {
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: 1 })
-        .populate("goal_id", "title"); // ✅ Populate goal title
+        .populate("title"); // ✅ Populate goal title
     const totalTasks = await tasks_model_1.taskModel.countDocuments({
         user: user.id,
         goal_id: goalId,

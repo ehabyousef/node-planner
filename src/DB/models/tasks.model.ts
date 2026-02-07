@@ -82,4 +82,48 @@ taskSchema.pre("save", function () {
   }
 });
 
+// Helper function to update goal progress
+async function updateGoalProgress(goalId: Types.ObjectId) {
+  const Task = model("Task");
+  const Goal = model("Goal");
+
+  const totalTasks = await Task.countDocuments({ goal_id: goalId });
+  
+  if (totalTasks === 0) {
+    await Goal.findByIdAndUpdate(goalId, { progress_percent: 0 });
+  } else {
+    const completedTasks = await Task.countDocuments({
+      goal_id: goalId,
+      status: "DONE",
+    });
+    const progress = Math.round((completedTasks / totalTasks) * 100);
+    await Goal.findByIdAndUpdate(goalId, { progress_percent: progress });
+  }
+}
+
+// Update goal progress after task is saved
+taskSchema.post("save", async function () {
+  await updateGoalProgress(this.goal_id);
+});
+
+// Update goal progress after task is updated
+taskSchema.post("findOneAndUpdate", async function (doc) {
+  if (doc) {
+    await updateGoalProgress(doc.goal_id);
+  }
+});
+
+// Update goal progress after task is deleted
+taskSchema.post("findOneAndDelete", async function (doc) {
+  if (doc) {
+    await updateGoalProgress(doc.goal_id);
+  }
+});
+
+taskSchema.post("deleteOne", async function (doc) {
+  if (doc && (doc as any).goal_id) {
+    await updateGoalProgress((doc as any).goal_id);
+  }
+});
+
 export const taskModel = model("Task", taskSchema);

@@ -20,7 +20,7 @@ export const getTasks = expressAsyncHandler(
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: 1 })
-      .populate("goal_id", "title"); // ✅ Populate goal title
+      .populate("title"); // ✅ Populate goal title
 
     const totalTasks = await taskModel.countDocuments({
       user: user.id,
@@ -56,7 +56,7 @@ export const goalTasks = expressAsyncHandler(
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: 1 })
-      .populate("goal_id", "title"); // ✅ Populate goal title
+      .populate("title"); // ✅ Populate goal title
 
     const totalTasks = await taskModel.countDocuments({
       user: user.id,

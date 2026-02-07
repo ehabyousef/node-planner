@@ -78,23 +78,4 @@ goalSchema.virtual("tasks", {
 // Enable virtuals in JSON
 goalSchema.set("toJSON", { virtuals: true });
 goalSchema.set("toObject", { virtuals: true });
-// Static method to get goal with calculated progress
-goalSchema.statics.findWithProgress = async function (query) {
-    const goals = await this.find(query);
-    const Task = (0, mongoose_1.model)("Task");
-    for (const goal of goals) {
-        const totalTasks = await Task.countDocuments({ goal_id: goal._id });
-        if (totalTasks === 0) {
-            goal.progress_percent = 0;
-        }
-        else {
-            const completedTasks = await Task.countDocuments({
-                goal_id: goal._id,
-                status: "COMPLETED",
-            });
-            goal.progress_percent = Math.round((completedTasks / totalTasks) * 100);
-        }
-    }
-    return goals;
-};
 exports.goalModel = (0, mongoose_1.model)("Goal", goalSchema);

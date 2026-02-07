@@ -79,4 +79,42 @@ taskSchema.pre("save", function () {
         }
     }
 });
+// Helper function to update goal progress
+async function updateGoalProgress(goalId) {
+    const Task = (0, mongoose_1.model)("Task");
+    const Goal = (0, mongoose_1.model)("Goal");
+    const totalTasks = await Task.countDocuments({ goal_id: goalId });
+    if (totalTasks === 0) {
+        await Goal.findByIdAndUpdate(goalId, { progress_percent: 0 });
+    }
+    else {
+        const completedTasks = await Task.countDocuments({
+            goal_id: goalId,
+            status: "DONE",
+        });
+        const progress = Math.round((completedTasks / totalTasks) * 100);
+        await Goal.findByIdAndUpdate(goalId, { progress_percent: progress });
+    }
+}
+// Update goal progress after task is saved
+taskSchema.post("save", async function () {
+    await updateGoalProgress(this.goal_id);
+});
+// Update goal progress after task is updated
+taskSchema.post("findOneAndUpdate", async function (doc) {
+    if (doc) {
+        await updateGoalProgress(doc.goal_id);
+    }
+});
+// Update goal progress after task is deleted
+taskSchema.post("findOneAndDelete", async function (doc) {
+    if (doc) {
+        await updateGoalProgress(doc.goal_id);
+    }
+});
+taskSchema.post("deleteOne", async function (doc) {
+    if (doc && doc.goal_id) {
+        await updateGoalProgress(doc.goal_id);
+    }
+});
 exports.taskModel = (0, mongoose_1.model)("Task", taskSchema);

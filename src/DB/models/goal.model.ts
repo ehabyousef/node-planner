@@ -1,11 +1,7 @@
-import { model, Model, Schema, Types } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 import { IGoal } from "../../utils/types";
-// Interface for Goal model with static methods
-interface IGoalModel extends Model<IGoal> {
-  findWithProgress(filter?: any): Promise<any[]>;
-}
 
-const goalSchema = new Schema<IGoal, IGoalModel>(
+const goalSchema = new Schema<IGoal>(
   {
     user: {
       type: Types.ObjectId,
@@ -87,24 +83,4 @@ goalSchema.virtual("tasks", {
 goalSchema.set("toJSON", { virtuals: true });
 goalSchema.set("toObject", { virtuals: true });
 
-// Static method to get goal with calculated progress
-goalSchema.statics.findWithProgress = async function (query) {
-  const goals = await this.find(query);
-  const Task = model("Task");
-
-  for (const goal of goals) {
-    const totalTasks = await Task.countDocuments({ goal_id: goal._id });
-    if (totalTasks === 0) {
-      goal.progress_percent = 0;
-    } else {
-      const completedTasks = await Task.countDocuments({
-        goal_id: goal._id,
-        status: "COMPLETED",
-      });
-      goal.progress_percent = Math.round((completedTasks / totalTasks) * 100);
-    }
-  }
-  return goals;
-};
-
-export const goalModel = model<IGoal, IGoalModel>("Goal", goalSchema);
+export const goalModel = model<IGoal>("Goal", goalSchema);
